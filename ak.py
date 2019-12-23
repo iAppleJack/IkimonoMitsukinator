@@ -1,5 +1,5 @@
 import sql3Module
-
+import json
 class Person:
 	def __init__(self, name, pdata, cnt, pId = 0):
 		self.id   = pId
@@ -7,6 +7,7 @@ class Person:
 		self.data = pdata
 		self.cnt  = cnt
 		self.damage = 0
+
 	def pprint(self):
 		print( "name:" , self.name, "data:", self.data, "cnt:", self.cnt, "damage:" , self.damage  )
 
@@ -16,6 +17,7 @@ class Question:
 		self.id   = id
 		self.name = name
 		self.priority = prior
+
 	def pprint(self):
 		print("id:" , self.id , "Question name:", self.name, "priority :", self.priority )
 
@@ -24,11 +26,33 @@ class KB:
 	def __init__(self):
 		self.persons = []
 		self.questions = []
+		self.db = sql3Module.DBConnector()
+		self.db.takeData()
+		self.parseDataPersons(self.db.users)
+		self.parseDataQuestions(self.db.questions)
+
 
 	def updateP(self, pNew):
 		for p in self.persons:
 			if p.id == pNew.id:
 				p = pNew
+
+	def parseDataPersons(self, persons):
+		for p in persons:
+			name = p['name']
+			data = p['data']
+			cnt  = p['cnt']
+			pid  = p['pid']
+			self.persons.append( Person(name, data,cnt, pid) )
+		self.showP(self.persons)
+
+	def parseDataQuestions(self, questions):
+		for q in questions:
+			name = q['name']
+			prio = q['priority']
+			qid  = q['qid'] 
+			self.questions.append( Question(name, qid, prio) )
+		self.showQ(self.questions)
 
 	def addQ (self):
 		qname = input(" Write Question Name")
@@ -94,17 +118,19 @@ class KB:
 					self.updateP(p)
 
 	def checkAnswerWithUPerson(self,  p , q, answer ):
+		print( "Q ID", q.id, p.data.keys(), type(p.data.keys()), q.id in p.data.keys() )
 		if q.id in p.data.keys():
 			value = p.data[q.id][0]
 			p.damage += abs(value - answer * 0.25)
-
+'''
 questions = []
 persons   = []
 db = sql3Module.DBConnector()
-db.takeData()
+#db.takeData()
+#print(db.users)
+#print(db.questions)
 
 
-'''
 p1 = Person("Cat", 		{ 1: [1.0, 1] , 2: [1.0, 1], 3:[1.0, 1], 4: [1.0, 1], 5: [0.0,  1], 6: [0.0, 1], 7: [0.0, 1] },  0, 1)
 p2 = Person("Dog", 		{ 1: [1.0, 1] , 2: [1.0, 1], 3:[0.0, 1], 4: [1.0, 1], 5: [0.0,  1], 6: [0.0, 1], 7: [0.75, 1] }, 0, 2)
 p3 = Person("Horse", 	{ 1: [1.0, 1] , 2: [1.0, 1], 3:[0.0, 1], 4: [0.0, 1], 5: [1.0,  1], 6: [0.0, 1], 7: [1.0, 1] },  0, 3)
@@ -134,9 +160,15 @@ questions.append(q5)
 questions.append(q6)
 questions.append(q7)
 questions.append(q8)
+
+for q in questions:
+	db.addQuestionPush(q)
+for p in persons:
+	db.addUserPush(p)
+db.push()
 '''
+
+print("init KB")
+
 kb = KB()
-kb.addPersons(persons)
-kb.addQuestions(questions)
-#kb.startAsker()
-print("Good")
+kb.startAsker()

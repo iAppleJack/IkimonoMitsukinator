@@ -25,7 +25,9 @@ class DBConnector:
     	pass
 
     def updatePerson(self, person):
-    	pass
+    	self.cursor.execute("UPDATE PERSON  SET DATA=? WHERE ID=?", (json.dumps(person.data), person.id))
+    	self.conn.commit()
+    	print( " UPDATE  PERSON ", person.name, person.data )
 
     def takeData(self):
     	print("Load Data from DB")
@@ -35,12 +37,8 @@ class DBConnector:
     	pdata = self.cursor.fetchall()
     	for i in pdata:
     		name = str(i[0])
-    		print(i[1])
     		data = json.loads(i[1])
     		data = dict(data)
-    		print(data, data['1'], type(data), type(data['1']))
-
-
     		cnt  = int(i[2])
     		pid  = int(i[3])
     		person = { 'name' : name, 'data' : data, 'cnt' : cnt, 'pid' : pid  } 
@@ -51,7 +49,6 @@ class DBConnector:
     	qdata = self.cursor.fetchall()
 
     	for j in qdata:
-    		print(" HAPPY BUDOU ",j)
     		name 		= str(j[0])
     		priority 	= int(j[1])
     		qid 		= str(j[2])
@@ -65,16 +62,17 @@ class DBConnector:
     		for q in self.questionsPush:
     			qprep.append( (q.name, q.priority, q.id) )
 
-	    	self.cursor.executemany("INSERT INTO QUESTIONS VALUES(?,?, ?)", qprep)
+	    	self.cursor.executemany("INSERT INTO QUESTIONS VALUES(?,?)", qprep)
     		print("Questions Succes ")
     		self.questionsPush = []
 
     	print("Try Push Persons")
-    	pprep = []
     	if len(self.usersPush) > 0:
     		for u in self.usersPush:
-    			pprep.append( (u.name, json.dumps(u.data), u.cnt, u.id) )	
-    		self.cursor.executemany("INSERT INTO PERSON VALUES(?,?,?,?)", pprep)
+    			self.cursor.execute("INSERT INTO PERSON  VALUES( ? , ? , ?, ?) ", (u.name, json.dumps(u.data), u.cnt, None))
+
+    			#pprep.append( (u.name, json.dumps(u.data), u.cnt) )	
+    		#self.cursor.execute("INSERT INTO PERSON VALUES(?,?,?)", pprep)
     	self.conn.commit()
 		#	pprep.append( (user.name, user.data, user.cnt) )
 		#self.cursor.executemany("INSERT INTO PERSON VALUES(?,?,?)", pprep)

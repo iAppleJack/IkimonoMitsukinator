@@ -9,7 +9,7 @@ class Person:
 		self.damage = 0
 
 	def pprint(self):
-		print( "name:" , self.name, "data:", self.data, "cnt:", self.cnt, "damage:" , self.damage  )
+		print( "name:" , self.name, "data:", self.data, "cnt:", self.cnt, "damage:" , self.damage , " ID:",self.id  )
 
 
 class Question:
@@ -94,19 +94,23 @@ class KB:
 		needNewPet = int(input("is Correct Pet ? 0 No 1 Yes"))
 		p = pRes[0]
 		if needNewPet == 0:
-			name = input("Input Name")
+			name = input("Input Name\n")
 			qres = {}
 			for q in uQuestions:
 				qres[q[0].id] = [ q[1] * 0.25, 1]
 			p1 = Person(name, qres,  0, len(self.persons))
-			persons.append(p1)
+			self.persons.append(p1)
+			self.db.addUserPush(p1)
+			self.db.push()
 
 		else :
 			# update person by new data from user
 			# q [0] - question 
 			# q[1] user Answer
+			print("CHECK PERSON DB :", p.name)
 			for q in uQuestions:
 				if q[0].id in p.data.keys():
+					print("OLD QUESTION", q)
 					val = p.data[q[0].id][0]
 					cnt = p.data[q[0].id][1]
 					cnt += 1
@@ -115,7 +119,14 @@ class KB:
 					p.data[q[0].id][1] = cnt
 					p.damage = 0
 					p.cnt += 1
-					self.updateP(p)
+				else:
+					print("NEW QUESTION", q)
+					val = q[1] * 0.25
+					cnt = 1
+					p.data[q[0].id] = [newVal, cnt]
+
+			self.updateP(p)
+			self.db.updatePerson(p)
 
 	def checkAnswerWithUPerson(self,  p , q, answer ):
 		print( "Q ID", q.id, p.data.keys(), type(p.data.keys()), q.id in p.data.keys() )
@@ -171,4 +182,6 @@ db.push()
 print("init KB")
 
 kb = KB()
-kb.startAsker()
+while(True):
+	print( "START GAME" )
+	kb.startAsker()

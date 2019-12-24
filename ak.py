@@ -23,6 +23,28 @@ class Question:
 
 
 class KB:
+	def __init__(self, persons, questions):
+		self.activeQ = questions[:]
+		self.activeP = persons[:]
+		self.lastQuestions = []
+
+	def getActiveQuestion(self):
+		if len(self.activeQ) > 0:
+			return self.activeQ[0]
+		else:
+			print("No have Active Questions")
+			return None
+
+	def makeAnswerActiveQuestion(self, answer):
+		q = self.getActiveQuestion()
+		if q:
+			self.lastQuestions.append(q)
+			self.activeQ.pop(0)
+		
+
+
+
+class Session:
 	def __init__(self):
 		self.persons = []
 		self.questions = []
@@ -133,6 +155,8 @@ class KB:
 		if q.id in p.data.keys():
 			value = p.data[q.id][0]
 			p.damage += abs(value - answer * 0.25)
+		else:
+			p.damage += abs(0.5 - answer * 0.25)
 '''
 questions = []
 persons   = []
@@ -179,9 +203,9 @@ for p in persons:
 db.push()
 '''
 
-print("init KB")
+print("init Session")
 
-kb = KB()
+session = Session()
 while(True):
 	print( "START GAME" )
-	kb.startAsker()
+	session.startAsker()
